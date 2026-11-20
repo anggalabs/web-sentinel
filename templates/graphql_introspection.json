@@ -1,0 +1,26 @@
+{
+  "id": "graphql_introspection_enabled",
+  "name": "GraphQL Introspection Query Enabled",
+  "severity": "MEDIUM",
+  "category": "Information Disclosure",
+  "request": {
+    "method": "GET",
+    "path": "/graphql?query={__schema{types{name}}}"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "and",
+      "words": [
+        "\"data\"",
+        "\"__schema\"",
+        "\"types\""
+      ]
+    }
+  ],
+  "description": "GraphQL schema introspection is enabled in production, revealing complete API queries, mutations, and backend types."
+}

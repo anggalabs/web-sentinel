@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "web-sentinel"
+version = "2.1.0"
+description = "Modular Web Reconnaissance & Vulnerability Audit Toolkit in Pure Python"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Angga Pratama" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+]
+
+[project.scripts]
+web-sentinel = "sentinel:main"

@@ -1,0 +1,26 @@
+{
+  "id": "firebase_public_database",
+  "name": "Exposed Firebase Realtime Database",
+  "severity": "HIGH",
+  "category": "Cloud Misconfiguration",
+  "request": {
+    "method": "GET",
+    "path": "/.json"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "or",
+      "words": [
+        "\"users\":",
+        "\"settings\":",
+        "\"auth\":"
+      ]
+    }
+  ],
+  "description": "Firebase Realtime Database instance permits open read access to unauthenticated requests via /.json."
+}

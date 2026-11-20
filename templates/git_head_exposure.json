@@ -1,0 +1,24 @@
+{
+  "id": "git_head_exposure",
+  "name": "Exposed Git Repository HEAD Pointer",
+  "severity": "HIGH",
+  "category": "Source Code Disclosure",
+  "request": {
+    "method": "GET",
+    "path": "/.git/HEAD"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "and",
+      "words": [
+        "ref: refs/heads/"
+      ]
+    }
+  ],
+  "description": "Exposed .git/HEAD file confirms active version control directory is publicly accessible on the web root."
+}

@@ -1,10 +1,10 @@
 # Web-Sentinel 🛡️
 
-**Web-Sentinel** adalah toolkit keamanan dan pengintaian (*reconnaissance*) aplikasi web berbasis Python yang dirancang modular dengan arsitektur **Zero External Dependencies** (menggunakan Python Standard Library). Tool ini dapat langsung dijalankan di sistem apa pun (Linux, Termux Android, Windows, macOS) tanpa perlu instalasi `pip` tambahan.
+**Web-Sentinel** adalah toolkit keamanan, pengintaian (*reconnaissance*), dan audit kerentanan aplikasi web berbasis Python yang dirancang modular dengan arsitektur **Zero External Dependencies** (menggunakan pustaka standar Python murni). Tool ini dapat langsung dijalankan di sistem apa pun (Linux, Termux Android, Windows, macOS) tanpa perlu instalasi modul `pip` tambahan.
 
 ---
 
-## ⚡ Fitur Utama & Modul
+## ⚡ Fitur Utama & Pilihan Modul
 
 1. **Subdomain Enumeration (Opsi 1):**
    * Mengambil data subdomain dari *Certificate Transparency* (`crt.sh`) secara pasif.
@@ -19,7 +19,7 @@
    * Mendeteksi server dan framework yang digunakan (Nginx, Apache, Cloudflare, WordPress, Laravel, Next.js, Express, dll.).
 
 4. **Sensitive Files & Directory Fuzzer (Opsi 4) — *Accelerated*:**
-   * Dioptimalkan dengan **HTTP Keep-Alive Connection Pooling** dan **Smart Heuristics** (otomatis memfilter path yang tidak relevan dengan tech stack untuk menghemat request).
+   * Dioptimalkan dengan **HTTP Keep-Alive Connection Pooling** dan **Smart Heuristics** (otomatis memfilter path yang tidak relevan dengan tech stack untuk menghemat bandwidth dan waktu).
 
 5. **Web Misconfiguration Audit (Opsi 5):**
    * **CORS Audit:** Menguji refleksi origin liar dengan kredensial aktif (`Access-Control-Allow-Credentials`).
@@ -29,44 +29,59 @@
    * Mendeteksi celah tingkat **Critical & High** menggunakan sistem template modular (berbasis JSON/YAML).
    * Celah bawaan meliputi:
      * Kebocoran berkas `.env` (Database credentials & API Keys).
-     * Eksposur `.git/config` (Potensi Source Code Leakage).
+     * Eksposur `.git/config` & `.git/HEAD` (Potensi Source Code Leakage).
+     * Eksposur Docker Registry v2 (`/v2/_catalog`).
+     * Eksposur Elasticsearch Open Indices (`/_cat/indices?v`).
+     * Eksposur Firebase Database publik (`/.json`).
+     * Introspeksi skema GraphQL terbuka (`/graphql`).
+     * Enumerasi User WordPress (`/wp-json/wp/v2/users`).
+     * Indikator Open Redirect.
      * Eksposur Spring Boot Actuator (`/actuator/env`).
-     * Paparan `phpinfo.php` dan skema Swagger/OpenAPI tak terproteksi.
-   * Pengguna dapat dengan mudah menambahkan template deteksi baru di folder `templates/`.
+     * Paparan `phpinfo.php` dan skema Swagger/OpenAPI.
 
-7. **Full Automated Audit (Opsi 7):**
-   * Menjalankan seluruh modul secara sekuensial dan otomatis.
+7. **Threat Intelligence & CVE Hunter (Opsi 7) — *Zero-Auth Cloud Intel*:**
+   * Integrasi langsung dengan **Shodan InternetDB** (tanpa perlu API key) untuk memetakan seluruh port terbuka, software CPEs, dan riwayat CVE yang terdeteksi secara global pada IP target.
+   * Cross-referencing otomatis ke database **OSV.dev** (Open Source Vulnerabilities) untuk mencari Known CVEs.
 
-8. **Export Laporan (Opsi 8):**
-   * Menyimpan hasil pemindaian ke dalam format **Markdown (.md)** dan **JSON (.json)** di folder `reports/`.
+8. **Full Automated Audit (Opsi 8):**
+   * Menjalankan seluruh modul 1 s/d 7 secara sekuensial dan otomatis.
+
+9. **Export Laporan (Opsi 9):**
+   * Menyimpan hasil audit ke dalam format **Markdown (.md)** dan **JSON (.json)** di folder `reports/`.
 
 ---
 
 ## 💻 Cara Menjalankan
 
-### Mode Menu Interaktif
+### 1. Jalankan Langsung dari Terminal
 ```bash
 python3 sentinel.py
 ```
-Masukkan nama domain/URL target saat diminta, lalu pilih nomor scan yang ingin dijalankan (`1` s/d `8`).
+Masukkan nama domain/URL target saat diminta, lalu pilih nomor scan yang ingin dijalankan (`1` s/d `9`).
 
-### Mode Command-Line Arguments (Otomasi)
-Jalankan full scan langsung:
+### 2. Jalankan Mode Flag Otomatis
 ```bash
+# Menjalankan seluruh modul audit sekaligus
 python3 sentinel.py -t example.com --all
+
+# Menjalankan modul spesifik (misal modul 6: Template Vuln, dan modul 7: Threat Intel)
+python3 sentinel.py -t example.com -m 6,7
 ```
 
-Jalankan hanya modul tertentu (misal modul 3 dan modul 6):
+### 3. Akses Perintah Global di Mana Saja (`web-sentinel`)
+Tool ini telah dilengkapi launcher di Termux:
 ```bash
-python3 sentinel.py -t example.com -m 3,6
+web-sentinel -t target.com --all
 ```
 
 ---
 
-## 📁 Struktur Proyek
+## 📁 Struktur Direktori
 ```text
 web-sentinel/
 ├── sentinel.py              # CLI & Menu interaktif utama
+├── setup.py / pyproject.toml# Konfigurasi instalasi package
+├── .github/workflows/ci.yml # Automated CI pipeline testing
 ├── core/
 │   ├── http_client.py       # Persistent Keep-Alive connection pool (Zero Dep)
 │   ├── config.py            # Konfigurasi port, timeout, dan wordlists
@@ -78,12 +93,8 @@ web-sentinel/
 │   ├── headers_tech.py      # Security headers & tech fingerprint
 │   ├── fuzzer.py            # Keep-Alive fuzzer & smart heuristics
 │   ├── misconfigs.py        # CORS & Clickjacking audit
-│   └── templates_scanner.py # Template engine untuk celah Critical/High
-├── templates/               # Koleksi rule deteksi celah keamanan
-│   ├── env_file_leak.json
-│   ├── git_config_leak.json
-│   ├── spring_actuator_env.json
-│   ├── phpinfo_exposure.json
-│   └── swagger_api_docs.json
+│   ├── templates_scanner.py # Template engine untuk celah Critical/High
+│   └── threat_intel.py      # Shodan InternetDB & OSV.dev CVE hunter
+├── templates/               # Koleksi rule deteksi celah keamanan (10+ Templates)
 └── reports/                 # Laporan hasil scan (Markdown & JSON)
 ```

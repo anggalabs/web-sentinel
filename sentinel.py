@@ -20,6 +20,7 @@ from modules.headers_tech import analyze_headers_and_tech
 from modules.fuzzer import run_directory_fuzzer
 from modules.misconfigs import run_misconfig_auditor
 from modules.templates_scanner import run_template_scanner
+from modules.threat_intel import run_threat_intel_hunter
 
 def clean_target(target_input: str):
     """Extract domain and full URL safely"""
@@ -46,21 +47,22 @@ def interactive_menu():
     detected_tech = []
     
     while True:
-        print(f"\n{Colors.CYAN}{'━' * 62}{Colors.RESET}")
+        print(f"\n{Colors.CYAN}{'━' * 64}{Colors.RESET}")
         print(f"Target Aktif: {Colors.GREEN}{Colors.BOLD}{domain}{Colors.RESET} ({url})")
-        print(f"{Colors.CYAN}{'━' * 62}{Colors.RESET}")
+        print(f"{Colors.CYAN}{'━' * 64}{Colors.RESET}")
         print(f" {Colors.BOLD}[1]{Colors.RESET} Subdomain Enumeration (Passive CT Logs + DNS Resolution)")
         print(f" {Colors.BOLD}[2]{Colors.RESET} Open Ports & Service Scanner (Top Web & Infra Ports)")
         print(f" {Colors.BOLD}[3]{Colors.RESET} Security Headers & Tech Stack Fingerprinting")
         print(f" {Colors.BOLD}[4]{Colors.RESET} Sensitive Files & Directory Fuzzer (Keep-Alive Accelerated)")
         print(f" {Colors.BOLD}[5]{Colors.RESET} Web Misconfiguration Audit (CORS, Clickjacking)")
         print(f" {Colors.BOLD}[6]{Colors.RESET} {Colors.RED}{Colors.BOLD}Critical & High Vulnerability Scanner (Template Rules){Colors.RESET}")
-        print(f" {Colors.BOLD}[7]{Colors.RESET} {Colors.YELLOW}Full Automated Audit (Jalankan Semua Opsi Sekaligus){Colors.RESET}")
-        print(f" {Colors.BOLD}[8]{Colors.RESET} Simpan Laporan Hasil Scan (Markdown & JSON)")
+        print(f" {Colors.BOLD}[7]{Colors.RESET} {Colors.MAGENTA}Threat Intelligence & CVE Hunter (Shodan + OSV.dev){Colors.RESET}")
+        print(f" {Colors.BOLD}[8]{Colors.RESET} {Colors.YELLOW}Full Automated Audit (Jalankan Semua Opsi Sekaligus){Colors.RESET}")
+        print(f" {Colors.BOLD}[9]{Colors.RESET} Simpan Laporan Hasil Scan (Markdown & JSON)")
         print(f" {Colors.BOLD}[0]{Colors.RESET} Keluar")
-        print(f"{Colors.CYAN}{'━' * 62}{Colors.RESET}")
+        print(f"{Colors.CYAN}{'━' * 64}{Colors.RESET}")
         
-        choice = input(f"{Colors.BOLD}Pilih opsi [0-8]: {Colors.RESET}").strip()
+        choice = input(f"{Colors.BOLD}Pilih opsi [0-9]: {Colors.RESET}").strip()
         
         if choice == "1":
             print_header("MODUL 1: SUBDOMAIN ENUMERATION")
@@ -95,6 +97,11 @@ def interactive_menu():
             reporter.add_result("Template Vulnerability Audit", res)
             
         elif choice == "7":
+            print_header("MODUL 7: THREAT INTELLIGENCE & CVE HUNTER")
+            res = run_threat_intel_hunter(domain)
+            reporter.add_result("Threat Intelligence & CVE Hunter", res)
+            
+        elif choice == "8":
             print_header("MENJALANKAN FULL AUTOMATED AUDIT")
             reporter.add_result("Subdomain Enumeration", run_subdomain_scanner(domain))
             reporter.add_result("Port Scanner", run_port_scanner(domain))
@@ -104,12 +111,13 @@ def interactive_menu():
             reporter.add_result("Directory Fuzzer", run_directory_fuzzer(url, detected_tech=dt))
             reporter.add_result("Misconfiguration Audit", run_misconfig_auditor(url))
             reporter.add_result("Template Vulnerability Audit", run_template_scanner(url))
+            reporter.add_result("Threat Intelligence & CVE Hunter", run_threat_intel_hunter(domain))
             
             md_path = reporter.save_markdown()
             json_path = reporter.save_json()
             print_success(f"Full audit selesai! Laporan tersimpan di:\n   - {md_path}\n   - {json_path}")
             
-        elif choice == "8":
+        elif choice == "9":
             md_path = reporter.save_markdown()
             json_path = reporter.save_json()
             print_success(f"Laporan berhasil diekspor ke:\n   - {md_path}\n   - {json_path}")
@@ -118,13 +126,13 @@ def interactive_menu():
             print_info("Terima kasih telah menggunakan Web-Sentinel. Sampai jumpa!")
             break
         else:
-            print_warning("Pilihan tidak valid, silakan masukkan angka 0-8.")
+            print_warning("Pilihan tidak valid, silakan masukkan angka 0-9.")
 
 def main():
     parser = argparse.ArgumentParser(description="Web-Sentinel: All-in-One Web Recon & Vulnerability Toolkit")
     parser.add_argument("-t", "--target", help="Target domain atau URL (contoh: example.com)")
     parser.add_argument("--all", action="store_true", help="Jalankan semua modul pemindaian secara otomatis")
-    parser.add_argument("-m", "--modules", help="Pilih modul spesifik (contoh: 1,2 atau 3,6)")
+    parser.add_argument("-m", "--modules", help="Pilih modul spesifik (contoh: 1,2 atau 6,7)")
     args = parser.parse_args()
     
     if not args.target:
@@ -151,6 +159,8 @@ def main():
             reporter.add_result("Misconfiguration Audit", run_misconfig_auditor(url))
         if args.all or "6" in selected:
             reporter.add_result("Template Vulnerability Audit", run_template_scanner(url))
+        if args.all or "7" in selected:
+            reporter.add_result("Threat Intelligence & CVE Hunter", run_threat_intel_hunter(domain))
             
         md_file = reporter.save_markdown()
         json_file = reporter.save_json()

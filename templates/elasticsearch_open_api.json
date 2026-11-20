@@ -1,0 +1,26 @@
+{
+  "id": "elasticsearch_indices_exposure",
+  "name": "Public Elasticsearch Cluster / Indices Exposure",
+  "severity": "CRITICAL",
+  "category": "Database Exposure",
+  "request": {
+    "method": "GET",
+    "path": "/_cat/indices?v"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "or",
+      "words": [
+        "health status index",
+        "green open",
+        "yellow open"
+      ]
+    }
+  ],
+  "description": "Elasticsearch REST API exposed on web port without authentication, leaking index names and document counts."
+}

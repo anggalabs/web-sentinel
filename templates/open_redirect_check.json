@@ -1,0 +1,17 @@
+{
+  "id": "open_redirect_check",
+  "name": "Potential Open Redirect Parameter",
+  "severity": "MEDIUM",
+  "category": "Input Validation",
+  "request": {
+    "method": "GET",
+    "path": "/redirect?url=https://example.com"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [301, 302, 307]
+    }
+  ],
+  "description": "Endpoint redirects requests based on user-supplied URL parameter, which could be abused for phishing attacks."
+}

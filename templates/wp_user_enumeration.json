@@ -1,0 +1,25 @@
+{
+  "id": "wp_user_enumeration",
+  "name": "WordPress User Enumeration via REST API",
+  "severity": "MEDIUM",
+  "category": "Information Disclosure",
+  "request": {
+    "method": "GET",
+    "path": "/wp-json/wp/v2/users"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "and",
+      "words": [
+        "\"slug\":",
+        "\"user_nicename\":"
+      ]
+    }
+  ],
+  "description": "WordPress REST API exposes user usernames and IDs, simplifying credential brute-force attacks."
+}

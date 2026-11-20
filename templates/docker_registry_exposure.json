@@ -1,0 +1,25 @@
+{
+  "id": "docker_registry_v2_catalog",
+  "name": "Public Docker Registry v2 Catalog Exposure",
+  "severity": "CRITICAL",
+  "category": "DevOps & Infrastructure",
+  "request": {
+    "method": "GET",
+    "path": "/v2/_catalog"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "and",
+      "words": [
+        "repositories",
+        "["
+      ]
+    }
+  ],
+  "description": "Docker Registry v2 API is publicly accessible without authentication, exposing internal container images."
+}
