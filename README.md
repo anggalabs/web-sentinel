@@ -1,14 +1,14 @@
 # Web-Sentinel 🛡️
 
-**Web-Sentinel** adalah toolkit keamanan, pengintaian (*reconnaissance*), dan audit kerentanan aplikasi web berbasis Python yang dirancang modular dengan arsitektur **Zero External Dependencies** (menggunakan pustaka standar Python murni). Tool ini dapat langsung dijalankan di sistem apa pun (Linux, Termux Android, Windows, macOS) tanpa perlu instalasi modul `pip` tambahan.
+**Web-Sentinel** adalah toolkit audit keamanan, pengintaian (*reconnaissance*), dan pemindai celah keamanan web (*DAST*) tingkat industri berbasis Python. Dirancang dengan arsitektur **Zero External Dependencies** (menggunakan Python Standard Library murni), tool ini dapat langsung dijalankan di Termux Android, Linux, macOS, dan Windows tanpa perlu instalasi `pip` tambahan.
 
 ---
 
-## ⚡ Fitur Utama & Pilihan Modul
+## ⚡ Fitur Utama & Modul Lengkap
 
 1. **Subdomain Enumeration (Opsi 1):**
    * Mengambil data subdomain dari *Certificate Transparency* (`crt.sh`) secara pasif.
-   * Melakukan validasi aktif (resolusi DNS) multi-threading untuk memastikan subdomain yang masih aktif.
+   * Melakukan validasi aktif (resolusi DNS) multi-threading untuk memvalidasi subdomain yang hidup.
 
 2. **Open Ports & Service Scanner (Opsi 2):**
    * Memindai port penting web dan infrastruktur (80, 443, 8080, 3306, 5432, 22, dll.).
@@ -18,60 +18,62 @@
    * Menganalisis *security headers* (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
    * Mendeteksi server dan framework yang digunakan (Nginx, Apache, Cloudflare, WordPress, Laravel, Next.js, Express, dll.).
 
-4. **Sensitive Files & Directory Fuzzer (Opsi 4) — *Accelerated*:**
-   * Dioptimalkan dengan **HTTP Keep-Alive Connection Pooling** dan **Smart Heuristics** (otomatis memfilter path yang tidak relevan dengan tech stack untuk menghemat bandwidth dan waktu).
+4. **Web Spider & Crawler (Opsi 4) — *Baru!*:**
+   * Menganalisis dokumen HTML & script JavaScript untuk mengekstrak seluruh link internal, tag `<form action="...">`, parameter input, dan endpoint API tersembunyi (`/api/v1/...`).
 
-5. **Web Misconfiguration Audit (Opsi 5):**
+5. **Sensitive Files & Directory Fuzzer (Opsi 5) — *Accelerated & Custom Wordlist*:**
+   * Dioptimalkan dengan **HTTP Keep-Alive Connection Pooling** dan **Smart Heuristics** (otomatis memfilter ekstensi yang tidak relevan dengan tech stack).
+   * Mendukung berkas wordlist eksternal kustom (`-w /path/to/wordlist.txt`).
+
+6. **Web Misconfiguration Audit (Opsi 6):**
    * **CORS Audit:** Menguji refleksi origin liar dengan kredensial aktif (`Access-Control-Allow-Credentials`).
    * **Clickjacking Audit:** Memeriksa keberadaan header pelindung framing (`X-Frame-Options` dan `frame-ancestors`).
 
-6. **Critical & High Vulnerability Scanner (Opsi 6) — *Template Engine*:**
-   * Mendeteksi celah tingkat **Critical & High** menggunakan sistem template modular (berbasis JSON/YAML).
-   * Celah bawaan meliputi:
-     * Kebocoran berkas `.env` (Database credentials & API Keys).
-     * Eksposur `.git/config` & `.git/HEAD` (Potensi Source Code Leakage).
-     * Eksposur Docker Registry v2 (`/v2/_catalog`).
-     * Eksposur Elasticsearch Open Indices (`/_cat/indices?v`).
-     * Eksposur Firebase Database publik (`/.json`).
-     * Introspeksi skema GraphQL terbuka (`/graphql`).
-     * Enumerasi User WordPress (`/wp-json/wp/v2/users`).
-     * Indikator Open Redirect.
-     * Eksposur Spring Boot Actuator (`/actuator/env`).
-     * Paparan `phpinfo.php` dan skema Swagger/OpenAPI.
+7. **Critical & High Vulnerability Scanner (Opsi 7) — *Template Engine*:**
+   * Mendeteksi celah tingkat **Critical & High** menggunakan sistem template modular JSON/YAML (terinspirasi dari arsitektur *Nuclei*).
+   * Koleksi 12+ template mencakup: `.env` leak, `.git/config` & `.git/HEAD` exposure, Docker Registry v2, Elasticsearch indices, Firebase DB publik, GraphQL Introspection, WordPress REST user enum, dan Spring Boot Actuator.
 
-7. **Threat Intelligence & CVE Hunter (Opsi 7) — *Zero-Auth Cloud Intel*:**
-   * Integrasi langsung dengan **Shodan InternetDB** (tanpa perlu API key) untuk memetakan seluruh port terbuka, software CPEs, dan riwayat CVE yang terdeteksi secara global pada IP target.
-   * Cross-referencing otomatis ke database **OSV.dev** (Open Source Vulnerabilities) untuk mencari Known CVEs.
+8. **Threat Intelligence & CVE Hunter (Opsi 8) — *Zero-Auth Cloud Intel*:**
+   * Terhubung dengan **Shodan InternetDB** (tanpa perlu API key) untuk memetakan seluruh port terbuka, software CPEs, dan riwayat CVE global pada IP target secara instan.
+   * Mengintegrasikan database **OSV.dev** untuk mencocokkan software framework target dengan basis data Known CVE.
 
-8. **Full Automated Audit (Opsi 8):**
-   * Menjalankan seluruh modul 1 s/d 7 secara sekuensial dan otomatis.
+9. **Active DAST Injection Audit (Opsi 9) — *Baru!*:**
+   * **Reflected XSS Canary:** Menguji apakah input parameter di-escape dengan benar atau direfleksikan mentah ke respons HTML.
+   * **SQL Injection Error Anomaly:** Menguji injeksi pemutus sintaks pada parameter dan mencocokkan respons dengan regex error database (MySQL, PostgreSQL, MSSQL, Oracle, SQLite).
+   * **Local File Inclusion (LFI):** Menguji path traversal canary pada parameter file (`/etc/passwd`).
 
-9. **Export Laporan (Opsi 9):**
-   * Menyimpan hasil audit ke dalam format **Markdown (.md)** dan **JSON (.json)** di folder `reports/`.
+10. **Full Automated Pipeline (Opsi 10):**
+    * Menjalankan seluruh modul 1 sampai 9 secara berantai dan otomatis.
+
+11. **Upstream Proxy Support (Opsi 11) — *Burp Suite & ZAP Ready*:**
+    * Mendukung perutean traffic melalui HTTP proxy (`-p http://127.0.0.1:8080`) termasuk TLS CONNECT tunneling.
+
+12. **Export Laporan (Opsi 12):**
+    * Menyimpan hasil audit lengkap ke format **Markdown (.md)** dan **JSON (.json)** di folder `reports/`.
 
 ---
 
-## 💻 Cara Menjalankan
+## 💻 Cara Menggunakan
 
-### 1. Jalankan Langsung dari Terminal
+### 1. Mode Menu Interaktif
+Cukup ketik perintah global di mana saja di terminal Termux Anda:
 ```bash
-python3 sentinel.py
-```
-Masukkan nama domain/URL target saat diminta, lalu pilih nomor scan yang ingin dijalankan (`1` s/d `9`).
-
-### 2. Jalankan Mode Flag Otomatis
-```bash
-# Menjalankan seluruh modul audit sekaligus
-python3 sentinel.py -t example.com --all
-
-# Menjalankan modul spesifik (misal modul 6: Template Vuln, dan modul 7: Threat Intel)
-python3 sentinel.py -t example.com -m 6,7
+web-sentinel
 ```
 
-### 3. Akses Perintah Global di Mana Saja (`web-sentinel`)
-Tool ini telah dilengkapi launcher di Termux:
+### 2. Mode Command-Line Arguments (Otomasi)
 ```bash
+# Full Automated Scan (Pipeline Mode)
 web-sentinel -t target.com --all
+
+# Menggunakan Custom Wordlist (SecLists)
+web-sentinel -t target.com -m 5 -w /path/to/common.txt
+
+# Menghubungkan Traffic ke Burp Suite / OWASP ZAP Proxy
+web-sentinel -t target.com --all -p http://127.0.0.1:8080
+
+# Menjalankan Spidering + DAST Injection saja
+web-sentinel -t target.com -m 4,9
 ```
 
 ---
@@ -83,18 +85,20 @@ web-sentinel/
 ├── setup.py / pyproject.toml# Konfigurasi instalasi package
 ├── .github/workflows/ci.yml # Automated CI pipeline testing
 ├── core/
-│   ├── http_client.py       # Persistent Keep-Alive connection pool (Zero Dep)
-│   ├── config.py            # Konfigurasi port, timeout, dan wordlists
-│   ├── ui.py                # ANSI colors & formatted tables
+│   ├── http_client.py       # Keep-Alive pool + Upstream Proxy tunneling
+│   ├── config.py            # Konfigurasi port, wordlist loader, timeout
+│   ├── ui.py                # ANSI colors & dynamic ASCII tables
 │   └── reporter.py          # Generator laporan Markdown & JSON
 ├── modules/
 │   ├── subdomains.py        # Pasif CT logs & DNS lookup
 │   ├── ports.py             # TCP port scanner & banner grabber
 │   ├── headers_tech.py      # Security headers & tech fingerprint
-│   ├── fuzzer.py            # Keep-Alive fuzzer & smart heuristics
+│   ├── crawler.py           # Web spider: HTML/JS endpoints & forms extractor
+│   ├── fuzzer.py            # Keep-Alive fuzzer, wordlists, heuristics
 │   ├── misconfigs.py        # CORS & Clickjacking audit
 │   ├── templates_scanner.py # Template engine untuk celah Critical/High
-│   └── threat_intel.py      # Shodan InternetDB & OSV.dev CVE hunter
-├── templates/               # Koleksi rule deteksi celah keamanan (10+ Templates)
+│   ├── threat_intel.py      # Shodan InternetDB & OSV.dev CVE hunter
+│   └── dast_scanner.py      # Active injection: XSS Canary, SQLi, LFI
+├── templates/               # Koleksi rule deteksi celah keamanan (12+ Templates)
 └── reports/                 # Laporan hasil scan (Markdown & JSON)
 ```

@@ -1,13 +1,13 @@
 """
 Optimized Sensitive Directory & Files Fuzzing Module.
-Includes Smart Heuristics and Persistent Keep-Alive Sessions.
+Includes Smart Heuristics, Persistent Keep-Alive Sessions, Custom Wordlists, and Upstream Proxy Support.
 """
 
 from urllib.parse import urljoin
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from core.http_client import PersistentSession
 from core.ui import print_info, print_success, print_warning, print_table, Colors
-from core.config import BUILTIN_SENSITIVE_PATHS
+from core.config import BUILTIN_SENSITIVE_PATHS, load_wordlist_file
 
 def apply_heuristics(paths: list, detected_tech: list = None) -> list:
     """
@@ -47,16 +47,28 @@ def check_path_persistent(session: PersistentSession, base_url: str, path: str):
         pass
     return None
 
-def run_directory_fuzzer(url: str, custom_paths=None, threads=20, detected_tech=None):
+def run_directory_fuzzer(url: str, custom_wordlist_path=None, threads=20, detected_tech=None, proxy=None):
     """
     Main runner for optimized sensitive file & directory fuzzer.
+    Supports custom external wordlists and HTTP proxy routing.
     """
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "https://" + url
     if not url.endswith("/"):
         url += "/"
 
-    base_paths = custom_paths if custom_paths else BUILTIN_SENSITIVE_PATHS
+    # Load custom wordlist if provided, otherwise use builtin
+    if custom_wordlist_path:
+        loaded = load_wordlist_file(custom_wordlist_path)
+        if loaded:
+            print_success(f"Loaded {len(loaded)} paths from custom wordlist: {custom_wordlist_path}")
+            base_paths = loaded
+        else:
+            print_warning(f"Could not read {custom_wordlist_path}. Falling back to built-in list.")
+            base_paths = BUILTIN_SENSITIVE_PATHS
+    else:
+        base_paths = BUILTIN_SENSITIVE_PATHS
+
     optimized_paths = apply_heuristics(base_paths, detected_tech)
     
     if len(optimized_paths) < len(base_paths):
@@ -64,7 +76,7 @@ def run_directory_fuzzer(url: str, custom_paths=None, threads=20, detected_tech=
         
     print_info(f"Fuzzing {len(optimized_paths)} paths with Keep-Alive connection pool ({threads} threads)...")
 
-    session = PersistentSession(timeout=4.0)
+    session = PersistentSession(timeout=4.0, proxy_url=proxy)
     found_entries = []
     
     with ThreadPoolExecutor(max_workers=threads) as executor:

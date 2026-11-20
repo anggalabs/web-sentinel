@@ -2,9 +2,11 @@
 Global configurations and constants for Web-Sentinel.
 """
 
+import os
+
 DEFAULT_TIMEOUT = 5.0
 DEFAULT_THREADS = 15
-DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 WebSentinel/1.0"
+DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 WebSentinel/3.0"
 
 # Common ports for web applications and critical services
 TOP_WEB_PORTS = {
@@ -85,3 +87,15 @@ BUILTIN_SENSITIVE_PATHS = [
     "/cpanel",
     "/phpmyadmin/"
 ]
+
+def load_wordlist_file(filepath: str) -> list:
+    """Load wordlist lines from custom file path"""
+    if not filepath or not os.path.exists(filepath):
+        return []
+    lines = []
+    with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                lines.append(line)
+    return lines
