@@ -1,0 +1,26 @@
+{
+  "id": "spring_actuator_env",
+  "name": "Spring Boot Actuator Environment Exposure",
+  "severity": "HIGH",
+  "category": "Misconfiguration",
+  "request": {
+    "method": "GET",
+    "path": "/actuator/env"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "or",
+      "words": [
+        "activeProfiles",
+        "propertySources",
+        "server.port"
+      ]
+    }
+  ],
+  "description": "Exposed Spring Boot Actuator endpoint leaking internal server configuration and environment variables."
+}

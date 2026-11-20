@@ -4,7 +4,7 @@
 
 ---
 
-## 🚀 Fitur & Pilihan Modul
+## ⚡ Fitur Utama & Modul
 
 1. **Subdomain Enumeration (Opsi 1):**
    * Mengambil data subdomain dari *Certificate Transparency* (`crt.sh`) secara pasif.
@@ -18,17 +18,26 @@
    * Menganalisis *security headers* (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
    * Mendeteksi server dan framework yang digunakan (Nginx, Apache, Cloudflare, WordPress, Laravel, Next.js, Express, dll.).
 
-4. **Sensitive Files & Directory Fuzzer (Opsi 4):**
-   * Memindai berkas sensitif dan titik akhir berbahaya (`.env`, `.git/HEAD`, `backup.zip`, `phpinfo.php`, `robots.txt`, `swagger.json`, `/admin`).
+4. **Sensitive Files & Directory Fuzzer (Opsi 4) — *Accelerated*:**
+   * Dioptimalkan dengan **HTTP Keep-Alive Connection Pooling** dan **Smart Heuristics** (otomatis memfilter path yang tidak relevan dengan tech stack untuk menghemat request).
 
 5. **Web Misconfiguration Audit (Opsi 5):**
    * **CORS Audit:** Menguji refleksi origin liar dengan kredensial aktif (`Access-Control-Allow-Credentials`).
    * **Clickjacking Audit:** Memeriksa keberadaan header pelindung framing (`X-Frame-Options` dan `frame-ancestors`).
 
-6. **Full Automated Audit (Opsi 6):**
+6. **Critical & High Vulnerability Scanner (Opsi 6) — *Template Engine*:**
+   * Mendeteksi celah tingkat **Critical & High** menggunakan sistem template modular (berbasis JSON/YAML).
+   * Celah bawaan meliputi:
+     * Kebocoran berkas `.env` (Database credentials & API Keys).
+     * Eksposur `.git/config` (Potensi Source Code Leakage).
+     * Eksposur Spring Boot Actuator (`/actuator/env`).
+     * Paparan `phpinfo.php` dan skema Swagger/OpenAPI tak terproteksi.
+   * Pengguna dapat dengan mudah menambahkan template deteksi baru di folder `templates/`.
+
+7. **Full Automated Audit (Opsi 7):**
    * Menjalankan seluruh modul secara sekuensial dan otomatis.
 
-7. **Export Laporan (Opsi 7):**
+8. **Export Laporan (Opsi 8):**
    * Menyimpan hasil pemindaian ke dalam format **Markdown (.md)** dan **JSON (.json)** di folder `reports/`.
 
 ---
@@ -36,11 +45,10 @@
 ## 💻 Cara Menjalankan
 
 ### Mode Menu Interaktif
-Cukup jalankan:
 ```bash
 python3 sentinel.py
 ```
-Anda akan diminta memasukkan target (contoh: `example.com`), kemudian menu interaktif bernomor `[0-7]` akan muncul.
+Masukkan nama domain/URL target saat diminta, lalu pilih nomor scan yang ingin dijalankan (`1` s/d `8`).
 
 ### Mode Command-Line Arguments (Otomasi)
 Jalankan full scan langsung:
@@ -48,7 +56,34 @@ Jalankan full scan langsung:
 python3 sentinel.py -t example.com --all
 ```
 
-Jalankan hanya modul tertentu (misal modul 1 dan modul 3):
+Jalankan hanya modul tertentu (misal modul 3 dan modul 6):
 ```bash
-python3 sentinel.py -t example.com -m 1,3
+python3 sentinel.py -t example.com -m 3,6
+```
+
+---
+
+## 📁 Struktur Proyek
+```text
+web-sentinel/
+├── sentinel.py              # CLI & Menu interaktif utama
+├── core/
+│   ├── http_client.py       # Persistent Keep-Alive connection pool (Zero Dep)
+│   ├── config.py            # Konfigurasi port, timeout, dan wordlists
+│   ├── ui.py                # ANSI colors & formatted tables
+│   └── reporter.py          # Generator laporan Markdown & JSON
+├── modules/
+│   ├── subdomains.py        # Pasif CT logs & DNS lookup
+│   ├── ports.py             # TCP port scanner & banner grabber
+│   ├── headers_tech.py      # Security headers & tech fingerprint
+│   ├── fuzzer.py            # Keep-Alive fuzzer & smart heuristics
+│   ├── misconfigs.py        # CORS & Clickjacking audit
+│   └── templates_scanner.py # Template engine untuk celah Critical/High
+├── templates/               # Koleksi rule deteksi celah keamanan
+│   ├── env_file_leak.json
+│   ├── git_config_leak.json
+│   ├── spring_actuator_env.json
+│   ├── phpinfo_exposure.json
+│   └── swagger_api_docs.json
+└── reports/                 # Laporan hasil scan (Markdown & JSON)
 ```

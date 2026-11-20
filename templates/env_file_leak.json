@@ -1,0 +1,29 @@
+{
+  "id": "env_file_leak",
+  "name": "Environment Variables (.env) Exposure",
+  "severity": "CRITICAL",
+  "category": "Information Disclosure",
+  "request": {
+    "method": "GET",
+    "path": "/.env"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "or",
+      "words": [
+        "DB_PASSWORD=",
+        "APP_KEY=",
+        "AWS_SECRET_ACCESS_KEY=",
+        "DATABASE_URL=",
+        "SECRET_KEY=",
+        "REDIS_PASSWORD="
+      ]
+    }
+  ],
+  "description": "Sensitive credentials and API secrets exposed in public .env file."
+}

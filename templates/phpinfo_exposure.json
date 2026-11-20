@@ -1,0 +1,25 @@
+{
+  "id": "phpinfo_exposure",
+  "name": "PHPInfo Information Disclosure",
+  "severity": "MEDIUM",
+  "category": "Information Disclosure",
+  "request": {
+    "method": "GET",
+    "path": "/phpinfo.php"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "and",
+      "words": [
+        "PHP Version",
+        "System"
+      ]
+    }
+  ],
+  "description": "phpinfo() output exposed revealing exact PHP modules, OS details, and internal configurations."
+}

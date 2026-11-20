@@ -1,0 +1,25 @@
+{
+  "id": "git_config_leak",
+  "name": "Exposed Git Repository Configuration",
+  "severity": "CRITICAL",
+  "category": "Source Code Disclosure",
+  "request": {
+    "method": "GET",
+    "path": "/.git/config"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "and",
+      "words": [
+        "[core]",
+        "repositoryformatversion"
+      ]
+    }
+  ],
+  "description": "The .git repository is publicly accessible, allowing attackers to dump source code."
+}

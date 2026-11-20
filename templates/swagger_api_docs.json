@@ -1,0 +1,25 @@
+{
+  "id": "swagger_api_docs",
+  "name": "Exposed Swagger/OpenAPI API Documentation",
+  "severity": "MEDIUM",
+  "category": "Reconnaissance",
+  "request": {
+    "method": "GET",
+    "path": "/v2/api-docs"
+  },
+  "matchers": [
+    {
+      "type": "status",
+      "values": [200]
+    },
+    {
+      "type": "word",
+      "condition": "or",
+      "words": [
+        "\"swagger\":",
+        "\"openapi\":"
+      ]
+    }
+  ],
+  "description": "Complete internal API schema and documentation endpoints exposed to unauthenticated users."
+}
